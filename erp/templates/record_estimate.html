@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Record Estimates</h2>
+    
+    <!-- Excel Upload Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Bulk Upload via Excel</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Excel File</label>
+                    {{ upload_form.excel_file }}
+                    <div class="form-text">
+                        <a href="{% url 'download_estimate_template' %}" class="text-decoration-none">
+                            <i class="fas fa-download"></i> Download template
+                        </a>
+                    </div>
+                </div>
+                <button type="submit" name="excel_upload" class="btn btn-primary">
+                    <i class="fas fa-file-import me-2"></i> Upload Estimates
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Manual Form Section -->
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Single Estimate Entry</h5>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Estimate Number</label>
+                        {{ form.bk_estimate_id }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Status</label>
+                        {{ form.status }}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Customer</label>
+                        {{ form.customer }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">CRM Officer</label>
+                        {{ form.sales_agent }}
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" name="form_submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Estimate
+                    </button>
+                    <a href="{% url 'list_estimates' %}" class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

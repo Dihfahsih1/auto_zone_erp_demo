@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Estimates</h2>
+        {% if perms.estimates.add_estimate %}
+        <a href="{% url 'record_estimate' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>New Estimate
+        </a>
+        {% endif %}
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-6">
+                    <form method="get" class="row g-2">
+                        <div class="col-md-5">
+                            <select name="status" class="form-select">
+                                <option value="">All Statuses</option>
+                                {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if value == request.GET.status %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <input type="text" name="customer" class="form-control" 
+                                   placeholder="Search customer..." value="{{ request.GET.customer }}">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                Filter
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Estimate #</th>
+                            <th>Customer</th>
+                            <th>CRM Officer</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for estimate in page_obj %}
+                        <tr>
+                            <td>{{ estimate.bk_estimate_id }}</td>
+                            <td>{{ estimate.customer }}</td>
+                            <td>{{ estimate.sales_agent }}</td>
+                            <td>
+                                <span style="color: black;" class="badge bg-{{ estimate.get_status_badge_color }}">
+                                    {{ estimate.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ estimate.created_at|date:"Y-m-d" }}</td>
+                            <td>
+                                {% if perms.estimates.change_estimate %}
+                                <a href="#" 
+                                   class="btn btn-sm btn-outline-primary"
+                                   title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4">No estimates found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if page_obj.paginator.num_pages > 1 %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">&laquo; First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                    {% endif %}
+                    
+                    <li class="page-item active">
+                        <span class="page-link">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

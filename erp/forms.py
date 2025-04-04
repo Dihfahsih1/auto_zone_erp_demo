@@ -1,7 +1,7 @@
 # dispatch/forms.py
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from .models import Dispatch,DeliveryNote
+from .models import Dispatch,DeliveryNote, Estimate
 
 class DispatchForm(forms.ModelForm):
     class Meta:
@@ -43,3 +43,35 @@ class DeliveryNoteForm(forms.ModelForm):
         help_texts = {
             'signed_document': 'Upload scanned copy or photo of signed delivery note (PDF, JPG, PNG)',
         }
+
+class EstimateForm(forms.ModelForm):
+    class Meta:
+        model = Estimate
+        fields = ['bk_estimate_id', 'customer', 'sales_agent', 'status']
+        widgets = {
+            'bk_estimate_id': forms.TextInput(attrs={'readonly': True}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
+            'customer': forms.TextInput(attrs={'class': 'form-control'}),
+            'sales_agent': forms.TextInput(attrs={'readonly': True, 'class': 'form-control'}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['bk_estimate_id'].required = False
+        self.fields['sales_agent'].required = False
+
+class EstimateUploadForm(forms.Form):
+    excel_file = forms.FileField(
+        label='Excel File',
+        help_text='Upload an Excel file with estimates. Required columns: bk_estimate_id, customer',
+        widget=forms.FileInput(attrs={
+            'accept': '.xlsx, .xls',
+            'class': 'form-control'
+        })
+    )
+    
+    def clean_excel_file(self):
+        file = self.cleaned_data['excel_file']
+        if not file.name.endswith(('.xlsx', '.xls')):
+            raise forms.ValidationError("Only Excel files are allowed")
+        return file

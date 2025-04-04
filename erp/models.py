@@ -124,18 +124,11 @@ class Estimate(models.Model):
         verbose_name=_("BK Estimate ID"),
         help_text=_("Reference ID from Bookkeeping System")
     )
-    customer = models.ForeignKey(
-        Customer,
-        on_delete=models.PROTECT,
-        verbose_name=_("Customer"),
-        related_name='estimates'
+    customer = models.CharField(
+        max_length=20, null=True
     )
-    sales_agent = models.ForeignKey(
-        Employee,
-        on_delete=models.PROTECT,
-        limit_choices_to={'department__name': 'Sales'},
-        verbose_name=_("Sales Agent"),
-        related_name='sales_estimates'
+    sales_agent = models.CharField(
+        max_length=20, null=True
     )
     status = models.CharField(
         max_length=20,
@@ -157,7 +150,7 @@ class Estimate(models.Model):
         ]
 
     def __str__(self):
-        return f"Estimate #{self.bk_estimate_id} - {self.customer.name} ({self.get_status_display()})"
+        return f"Estimate #{self.bk_estimate_id} - {self.customer} ({self.get_status_display()})"
 
     def get_absolute_url(self):
         return reverse('estimate-detail', kwargs={'pk': self.pk})

@@ -5,12 +5,17 @@ from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from erp.forms import DispatchForm,DeliveryNoteForm
+from erp.forms import DispatchForm,DeliveryNoteForm, EstimateForm
 from .models import DeliveryNote, Dispatch, Estimate
 import json
 from django.db.models import Q
-
+from django.core.paginator import Paginator
 from django.views.decorators.http import require_http_methods
+import pandas as pd
+from io import BytesIO
+from datetime import datetime
+from .models import Estimate
+from .forms import EstimateForm, EstimateUploadForm
 
 @require_http_methods(["PATCH"])
 def mark_delivered(request, dispatch_id):
@@ -165,3 +170,151 @@ def delivery_note_list(request):
         'is_admin': request.user.is_staff,
     }
     return render(request, 'delivery_note_list.html', context)
+
+
+def record_estimate(request):
+    if request.method == 'POST':
+        # Check which form was submitted
+        if 'excel_file' in request.FILES:
+            return handle_excel_upload(request)
+        else:
+            return handle_form_submission(request)
+    
+    # GET request - show both forms
+    form = EstimateForm(initial={
+        'status': Estimate.Status.DRAFT,
+        'bk_estimate_id': generate_estimate_id(),
+        'sales_agent': request.user.get_full_name() or request.user.username
+    })
+    upload_form = EstimateUploadForm()
+    
+    return render(request, 'record_estimate.html', {
+        'form': form,
+        'upload_form': upload_form
+    })
+
+def handle_form_submission(request):
+    form = EstimateForm(request.POST)
+    if form.is_valid():
+        estimate = form.save()
+        messages.success(request, f'Estimate #{estimate.bk_estimate_id} recorded successfully!')
+        return redirect('list_estimates')
+    else:
+        upload_form = EstimateUploadForm()
+        return render(request, 'record_estimate.html', {
+            'form': form,
+            'upload_form': upload_form
+        })
+
+def handle_excel_upload(request):
+    upload_form = EstimateUploadForm(request.POST, request.FILES)
+    if not upload_form.is_valid():
+        form = EstimateForm()
+        return render(request, 'record_estimate.html', {
+            'form': form,
+            'upload_form': upload_form
+        })
+    
+    try:
+        excel_file = request.FILES['excel_file']
+        df = pd.read_excel(excel_file)
+        
+        required_columns = ['bk_estimate_id', 'customer', 'status']
+        if not all(col in df.columns for col in required_columns):
+            raise ValueError("Missing required columns in Excel file")
+        
+        success_count = 0
+        for _, row in df.iterrows():
+            try:
+                Estimate.objects.create(
+                    bk_estimate_id=row['bk_estimate_id'],
+                    customer=row['customer'],
+                    sales_agent=row.get('sales_agent', request.user.get_full_name() or request.user.username),
+                    status=row.get('status', Estimate.Status.DRAFT),
+                    created_at=row.get('created_at', datetime.now())
+                )
+                success_count += 1
+            except Exception as e:
+                messages.warning(request, f"Error processing row {_ + 2}: {str(e)}")
+        
+        messages.success(request, f"Successfully imported {success_count} estimates!")
+        return redirect('list_estimates')
+    
+    except Exception as e:
+        messages.error(request, f"Error processing Excel file: {str(e)}")
+        form = EstimateForm()
+        upload_form = EstimateUploadForm()
+        return render(request, 'record_estimate.html', {
+            'form': form,
+            'upload_form': upload_form
+        })
+
+def generate_estimate_id():
+    """Generate a new estimate ID in EST-YYYY-NNNN format"""
+    from django.utils import timezone
+    year = timezone.now().strftime('%Y')
+    last_estimate = Estimate.objects.order_by('-bk_estimate_id').first()
+    if last_estimate:
+        last_num = int(last_estimate.bk_estimate_id.split('-')[-1])
+        return f"EST-{year}-{last_num + 1:04d}"
+    return f"EST-{year}-0001"
+
+def list_estimates(request):
+    # Get filter parameters
+    status_filter = request.GET.get('status')
+    customer_filter = request.GET.get('customer')
+    
+    # Base queryset
+    estimates = Estimate.objects.all().order_by('-created_at')
+    
+    # Apply filters
+    if status_filter:
+        estimates = estimates.filter(status=status_filter)
+    if customer_filter:
+        estimates = estimates.filter(customer__icontains=customer_filter)
+    
+    # Restrict view based on permissions
+    if not request.user.has_perm('estimates.view_all_estimates'):
+        estimates = estimates.filter(sales_agent=request.user.get_full_name() or request.user.username)
+    
+    # Pagination
+    paginator = Paginator(estimates, 25)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'status_choices': Estimate.Status.choices,
+        'can_change_status': request.user.has_perm('estimates.change_estimate_status'),
+    }
+    return render(request, 'list_estimates.html', context)
+
+
+from django.http import HttpResponse
+import pandas as pd
+from io import BytesIO
+
+def download_estimate_template(request):
+    # Create a sample DataFrame
+    data = {
+        'bk_estimate_id': ['EST-2023-0001', 'EST-2023-0002'],
+        'customer': ['Customer A', 'Customer B'],
+        'sales_agent': ['Agent 1', 'Agent 2'],
+        'status': ['draft', 'submitted'],
+        'created_at': [datetime.now(), datetime.now()]
+    }
+    df = pd.DataFrame(data)
+    
+    # Create Excel file in memory
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Estimates')
+    
+    # Prepare response
+    output.seek(0)
+    response = HttpResponse(
+        output.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=estimate_template.xlsx'
+    return response
