@@ -343,31 +343,52 @@ class Dispatch(models.Model):
         }
         return classes.get(self.status, 'bg-secondary')
 
-class DeliveryConfirmation(models.Model):
-    SALES_PERSON = "sales"
-    DISPATCH = "dispatch"
-    ROLES = [
-        (SALES_PERSON, "Sales Person"),
-        (DISPATCH, "Dispatch Officer"),
-    ]
-    
-    uploaded_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.PROTECT,
-        limit_choices_to={'groups__name': 'Sales'}, blank=True
+from django.core.validators import FileExtensionValidator
+
+class DeliveryNote(models.Model):
+    estimate_number = models.CharField(
+        max_length=20,
+        verbose_name="Estimate Number",
+        help_text="The estimate number this delivery note belongs to"
     )
-    signed_image = models.ImageField(
-        upload_to='delivery_notes/%Y/%m/',
-        validators=[FileExtensionValidator(['jpg', 'png', 'jpeg'])], blank=True
+    customer_name = models.CharField(
+        max_length=100,
+        verbose_name="Customer Name"
     )
-    customer_name = models.CharField(max_length=200, blank=True)
-    estimate_number = models.CharField(max_length=50, blank=True)
-    delivery_date = models.DateField(null=True, blank=True)
-    extracted_data = models.JSONField(default=dict)  # Store OCR results
-    created_at = models.DateTimeField(default=timezone.now)
+    destination = models.CharField(
+        max_length=200,
+        verbose_name="Delivery Destination"
+    )
+    customer_remarks = models.TextField(
+        verbose_name="Customer Remarks",
+        blank=True,
+        null=True
+    )
+    sales_agent = models.CharField(
+        max_length=100,
+        verbose_name="Sales Agent Name"
+    )
+    signed_document = models.FileField(
+        upload_to='delivery_notes/%Y/%m/%d/',
+        validators=[FileExtensionValidator(['pdf', 'jpg', 'jpeg', 'png'])],
+        verbose_name="Signed Delivery Note"
+    )
+    upload_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Upload Date"
+    )
+    is_verified = models.BooleanField(
+        default=False,
+        verbose_name="Verified by Admin"
+    )
+
+    class Meta:
+        verbose_name = "Customer Delivery Note"
+        verbose_name_plural = "Customer Delivery Notes"
+        ordering = ['-upload_date']
 
     def __str__(self):
-        return f"Delivery #{self.id} - {self.customer_name}"
+        return f"Delivery Note for {self.estimate_number} - {self.customer_name}"
 
 # ----------------------------
 # 5. Reconciliation

@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                    <h6>Delivery Notes</h6>
+                    <div>
+                        <a href="{% url 'upload_delivery_note' %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus me-1"></i> Upload New
+                        </a>
+                        <form method="get" class="d-inline ms-2">
+                            <div class="input-group input-group-sm">
+                                <input type="text" name="search" class="form-control" 
+                                       placeholder="Search..." value="{{ search_query }}">
+                                <button class="btn btn-outline-secondary" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="card-body px-0 pt-0 pb-2">
+                    <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Estimate #</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Customer</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Destination</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Agent</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Uploaded</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for note in delivery_notes %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <p class="text-xs font-weight-bold mb-0">{{ note.estimate_number }}</p>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0">{{ note.customer_name }}</p>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0">{{ note.destination }}</p>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0">{{ note.sales_agent }}</p>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0">{{ note.upload_date|date:"M d, Y H:i" }}</p>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-sm {% if note.is_verified %}bg-gradient-success{% else %}bg-gradient-warning{% endif %}">
+                                            {% if note.is_verified %}Verified{% else %}Pending{% endif %}
+                                        </span>
+                                    </td>
+                                    <td class="align-middle">
+                                        <a href="{{ note.signed_document.url }}" 
+                                           target="_blank"
+                                           class="btn btn-sm btn-outline-info me-1"
+                                           data-bs-toggle="tooltip" 
+                                           title="View Document">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if is_admin and not note.is_verified %}
+                                        <a href="#" 
+                                           class="btn btn-sm btn-outline-success"
+                                           data-bs-toggle="tooltip"
+                                           title="Verify">
+                                            <i class="fas fa-check"></i>
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">
+                                        No delivery notes found
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Initialize tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+})
+</script>
+{% endblock %}
