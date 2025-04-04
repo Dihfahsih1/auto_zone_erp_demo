@@ -75,3 +75,22 @@ class EstimateUploadForm(forms.Form):
         if not file.name.endswith(('.xlsx', '.xls')):
             raise forms.ValidationError("Only Excel files are allowed")
         return file
+    
+class DispatchVerificationForm(forms.ModelForm):
+    class Meta:
+        model = Dispatch
+        fields = ['vehicle_number', 'driver_name', 'driver_contact', 'cancellation_reason']
+        widgets = {
+            'vehicle_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'driver_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'driver_contact': forms.TextInput(attrs={'class': 'form-control'}),
+            'cancellation_reason': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Enter reason for cancellation if applicable'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['cancellation_reason'].required = False

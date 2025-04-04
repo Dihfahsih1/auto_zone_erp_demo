@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">
+                <i class="fas fa-clipboard-check me-2"></i>
+                Dispatch Verification - {{ dispatch.bk_proforma_id }}
+            </h4>
+        </div>
+        
+        <div class="card-body">
+            <!-- Dispatch Summary -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Dispatch Details</h5>
+                    <table class="table table-sm">
+                        <tr>
+                            <th>Estimate Number:</th>
+                            <td>{{ dispatch.estimate|default:"N/A" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Proforma ID:</th>
+                            <td>{{ dispatch.bk_proforma_id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Transport Cost:</th>
+                            <td>{{ dispatch.transport_cost }}</td>
+                        </tr>
+                        <tr>
+                            <th>Status:</th>
+                            <td>
+                                <span class="badge {{ dispatch.status_badge_class }}">
+                                    {{ dispatch.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                
+                {% if estimate %}
+                <div class="col-md-6">
+                    <h5>Estimate Details</h5>
+                    <table class="table table-sm">
+                        <tr>
+                            <th>Customer:</th>
+                            <td>{{ estimate.customer }}</td>
+                        </tr>
+                        <tr>
+                            <th>Sales Agent:</th>
+                            <td>{{ estimate.sales_agent }}</td>
+                        </tr>
+                        <tr>
+                            <th>Status:</th>
+                            <td>
+                                <span class="badge bg-{{ estimate.get_status_badge_color }}">
+                                    {{ estimate.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Created:</th>
+                            <td>{{ estimate.created_at|date:"Y-m-d" }}</td>
+                        </tr>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Verification Form -->
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        {{ form.vehicle_number.label_tag }}
+                        {{ form.vehicle_number }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.driver_name.label_tag }}
+                        {{ form.driver_name }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.driver_contact.label_tag }}
+                        {{ form.driver_contact }}
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    {{ form.cancellation_reason.label_tag }}
+                    {{ form.cancellation_reason }}
+                    <small class="text-muted">Only required if cancelling dispatch</small>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'dispatch-list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i> Back to List
+                    </a>
+                    
+                    <div>
+                        <button type="submit" name="cancel" class="btn btn-danger me-2">
+                            <i class="fas fa-times-circle me-2"></i> Cancel Dispatch
+                        </button>
+                        <button type="submit" name="verify" class="btn btn-success">
+                            <i class="fas fa-check-circle me-2"></i> Verify Dispatch
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

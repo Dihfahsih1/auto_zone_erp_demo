@@ -12,6 +12,7 @@ urlpatterns = [
      path('delivery/notes/', views.delivery_note_list, name='delivery_note_list'),
      path('record/', views.record_estimate, name='record_estimate'),
      path('list/', views.list_estimates, name='list_estimates'),
-      path('download-template/', views.download_estimate_template, name='download_estimate_template'),
+     path('download-template/', views.download_estimate_template, name='download_estimate_template'),
+     path('dispatch/<int:dispatch_id>/verify/', views.verify_dispatch, name='verify-dispatch'),
     
 ]

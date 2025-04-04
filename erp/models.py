@@ -167,6 +167,18 @@ class Estimate(models.Model):
         )
         return True
 
+    def get_status_badge_color(self):
+        colors = {
+            'draft': 'secondary',
+            'submitted': 'info',
+            'verified': 'primary',
+            'dispatched': 'warning',
+            'delivered': 'success',
+            'rejected': 'danger',
+            'cancelled': 'dark'
+        }
+        return colors.get(self.status, 'light')
+
 
 class EstimateItem(models.Model):
     estimate = models.ForeignKey(

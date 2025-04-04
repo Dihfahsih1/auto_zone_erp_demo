@@ -15,7 +15,8 @@ import pandas as pd
 from io import BytesIO
 from datetime import datetime
 from .models import Estimate
-from .forms import EstimateForm, EstimateUploadForm
+from .forms import DispatchVerificationForm, EstimateForm, EstimateUploadForm
+from django.shortcuts import render, get_object_or_404, redirect
 
 @require_http_methods(["PATCH"])
 def mark_delivered(request, dispatch_id):
@@ -318,3 +319,35 @@ def download_estimate_template(request):
     )
     response['Content-Disposition'] = 'attachment; filename=estimate_template.xlsx'
     return response
+
+from django.utils import timezone
+def verify_dispatch(request, dispatch_id):
+    dispatch = get_object_or_404(Dispatch, pk=dispatch_id)
+    
+    # Get the estimate if exists
+    estimate = None
+    if dispatch.estimate:
+        estimate = Estimate.objects.filter(bk_estimate_id=dispatch.estimate).first()
+    
+    if request.method == 'POST':
+        form = DispatchVerificationForm(request.POST, instance=dispatch)
+        if form.is_valid():
+            if 'verify' in request.POST:
+                dispatch = form.save(commit=False)
+                dispatch.mark_as_in_transit()
+                messages.success(request, 'Dispatch verified and marked as In Transit!')
+            elif 'cancel' in request.POST:
+                dispatch = form.save(commit=False)
+                dispatch.cancel_dispatch(form.cleaned_data.get('cancellation_reason'))
+                messages.warning(request, 'Dispatch cancelled with reason.')
+            return redirect('dispatch-detail', dispatch_id=dispatch.id)
+    else:
+        form = DispatchVerificationForm(instance=dispatch)
+    
+    context = {
+        'dispatch': dispatch,
+        'estimate': estimate,
+        'form': form,
+        'now': timezone.now().strftime("%Y-%m-%d %H:%M"),
+    }
+    return render(request, 'verify_dispatch.html', context)
