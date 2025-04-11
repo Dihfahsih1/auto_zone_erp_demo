@@ -396,7 +396,7 @@ class DeliveryNote(models.Model):
         return f"Delivery Note for {self.estimate_number} - {self.customer_name}"
 
 # ----------------------------
-# 5. Reconciliation
+# 5. Reconciliation          #
 # ----------------------------
 class StoresReconciliation(models.Model):
     estimate = models.OneToOneField(
