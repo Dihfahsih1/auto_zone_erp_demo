@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+
+        {% load static %}
+
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        
+          <h2 class="mb-4">Customer Information Form</h2>
+        
+          {% if submitted %}
+            <div class="alert alert-success">Customer registered successfully!</div>
+          {% endif %}
+        
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+        
+            <!-- SECTION 1: Business Details -->
+            <div class="card mb-4">
+              <div class="card-header bg-primary text-white">1. Business Details</div>
+              <div class="card-body row g-3">
+                <div class="col-md-6">{{ form.name_of_business.label_tag }}{{ form.name_of_business }}</div>
+                <div class="col-md-6">{{ form.district.label_tag }}{{ form.district }}</div>
+                <div class="col-md-6">{{ form.road_location.label_tag }}{{ form.road_location }}</div>
+                <div class="col-md-6">{{ form.town_division.label_tag }}{{ form.town_division }}</div>
+                <div class="col-md-6">{{ form.nearest_landmark.label_tag }}{{ form.nearest_landmark }}</div>
+                <div class="col-md-6">{{ form.tel_1.label_tag }}{{ form.tel_1 }}</div>
+                <div class="col-md-6">{{ form.tel_2.label_tag }}{{ form.tel_2 }}</div>
+                <div class="col-md-12">{{ form.location.label_tag }}{{ form.location }}</div>
+              </div>
+            </div>
+        
+            <!-- SECTION 2: Ownership & Next of Kin -->
+            <div class="card mb-4">
+              <div class="card-header bg-secondary text-white">2. Ownership & Emergency Contact</div>
+              <div class="card-body row g-3">
+                <div class="col-md-6">{{ form.owner_name.label_tag }}{{ form.owner_name }}</div>
+                <div class="col-md-6">{{ form.owner_tel.label_tag }}{{ form.owner_tel }}</div>
+                <div class="col-md-6">{{ form.next_of_kin.label_tag }}{{ form.next_of_kin }}</div>
+                <div class="col-md-6">{{ form.next_of_kin_tel.label_tag }}{{ form.next_of_kin_tel }}</div>
+              </div>
+            </div>
+        
+            <!-- SECTION 3: Signatures -->
+            <div class="card mb-4">
+              <div class="card-header bg-info text-white">3. Signature & Prepared By</div>
+              <div class="card-body row g-3">
+                <div class="col-md-6">{{ form.signed_by.label_tag }}{{ form.signed_by }}</div>
+                <div class="col-md-6">{{ form.designation.label_tag }}{{ form.designation }}</div>
+                <div class="col-md-6">{{ form.prepared_by.label_tag }}{{ form.prepared_by }}</div>
+                <div class="col-md-6">{{ form.prepared_by_sign.label_tag }}{{ form.prepared_by_sign }}</div>
+                <div class="col-md-6">{{ form.prepared_date.label_tag }}{{ form.prepared_date }}</div>
+                <div class="col-md-12">{{ form.remarks.label_tag }}{{ form.remarks }}</div>
+              </div>
+            </div>
+        
+            <!-- SECTION 4: Attachments -->
+            <div class="card mb-4">
+              <div class="card-header bg-dark text-white">4. Attachments</div>
+              <div class="card-body row g-3">
+                <div class="col-md-6">{{ form.certificate_of_incorporation.label_tag }}{{ form.certificate_of_incorporation }}</div>
+                <div class="col-md-6">{{ form.passport_photo.label_tag }}{{ form.passport_photo }}</div>
+                <div class="col-md-6">{{ form.business_billboard.label_tag }}{{ form.business_billboard }}</div>
+              </div>
+            </div>
+        
+            <button type="submit" class="btn btn-success">Submit Form</button>
+          </form>
+        </div>
+        
+          
+          <script>
+          document.addEventListener('DOMContentLoaded', () => {
+              const input = document.getElementById('location-input');
+          
+              // Try geolocation first
+              if (navigator.geolocation) {
+                  navigator.geolocation.getCurrentPosition(function(position) {
+                      const lat = position.coords.latitude;
+                      const lon = position.coords.longitude;
+          
+                      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14`)
+                          .then(res => res.json())
+                          .then(data => {
+                              input.value = data.display_name;
+                          });
+                  }, function(error) {
+                      console.log('GPS access denied or not available.');
+                      // Do nothing — user will use search fallback
+                  });
+              }
+          
+              // Manual typing fallback with suggestion
+              let timeout = null;
+          
+              input.addEventListener('input', () => {
+                  clearTimeout(timeout);
+                  timeout = setTimeout(() => {
+                      const query = input.value;
+          
+                      if (query.length > 2) {
+                          fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}+Uganda`)
+                              .then(res => res.json())
+                              .then(data => {
+                                  let datalist = document.getElementById('location-list');
+                                  if (!datalist) {
+                                      datalist = document.createElement('datalist');
+                                      datalist.id = 'location-list';
+                                      document.body.appendChild(datalist);
+                                      input.setAttribute('list', 'location-list');
+                                  }
+          
+                                  datalist.innerHTML = '';
+                                  data.forEach(place => {
+                                      const option = document.createElement('option');
+                                      option.value = place.display_name;
+                                      datalist.appendChild(option);
+                                  });
+                              });
+                      }
+                  }, 400);
+              });
+          });
+          </script>
+          
+
+    </div>
+</div>
+{% endblock %}

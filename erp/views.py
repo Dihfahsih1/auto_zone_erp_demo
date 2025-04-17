@@ -17,6 +17,20 @@ from datetime import datetime
 from .models import Estimate
 from .forms import DispatchVerificationForm, EstimateForm, EstimateUploadForm
 from django.shortcuts import render, get_object_or_404, redirect
+from .forms import CustomerForm
+
+def register_customer(request):
+    submitted = False
+    if request.method == 'POST':
+        form = CustomerForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            form = CustomerForm()
+            submitted = True
+    else:
+        form = CustomerForm()
+
+    return render(request, 'register_customer.html', {'form': form, 'submitted': submitted})
 
 @require_http_methods(["PATCH"])
 def mark_delivered(request, dispatch_id):

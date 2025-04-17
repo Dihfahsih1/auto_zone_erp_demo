@@ -31,8 +31,8 @@ class EmployeeAdmin(admin.ModelAdmin):
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ('name', 'contact', 'email', 'address')
-    search_fields = ('name', 'contact', 'email')
+    list_display = ('owner_name','district')
+    search_fields = ('owner_name','district')
     list_per_page = 20
 
 

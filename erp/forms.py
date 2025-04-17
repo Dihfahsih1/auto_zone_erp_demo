@@ -3,6 +3,22 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 from .models import Dispatch,DeliveryNote, Estimate
 
+from .models import Customer
+
+class CustomerForm(forms.ModelForm):
+    class Meta:
+        model = Customer
+        fields = '__all__'
+        widgets = {
+            'location': forms.TextInput(attrs={'id': 'location-input', 'placeholder': 'Auto-detect or type location'}),
+            'prepared_date': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(CustomerForm, self).__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.update({'class': 'form-control'})
+
 class DispatchForm(forms.ModelForm):
     class Meta:
         model = Dispatch

@@ -61,18 +61,40 @@ class Employee(AbstractUser):
         verbose_name_plural = _("Employees")
 
 class Customer(models.Model):
-    name = models.CharField(max_length=100, verbose_name=_("Customer Name"))
-    contact = models.CharField(max_length=100, verbose_name=_("Contact Information"))
-    email = models.EmailField(blank=True, verbose_name=_("Email Address"))
-    address = models.TextField(blank=True, verbose_name=_("Physical Address"))
+    name_of_business = models.CharField(max_length=200, blank=True, null=True)
+    district = models.CharField(max_length=100, blank=True, null=True)
+    road_location = models.CharField(max_length=150, blank=True, null=True)
+    town_division = models.CharField(max_length=100, blank=True, null=True)
+    nearest_landmark = models.CharField(max_length=150, blank=True, null=True)
+    tel_1 = models.CharField(max_length=15, blank=True, null=True)
+    tel_2 = models.CharField(max_length=15, blank=True, null=True)
 
-    class Meta:
-        ordering = ['name']
-        verbose_name = _("Customer")
-        verbose_name_plural = _("Customers")
+    owner_name = models.CharField(max_length=100,blank=True, null=True)
+    owner_tel = models.CharField(max_length=15, blank=True, null=True)
+
+    next_of_kin = models.CharField(max_length=100, blank=True, null=True)
+    next_of_kin_tel = models.CharField(max_length=15, blank=True, null=True)
+
+    signed_by = models.CharField(max_length=100,blank=True, null=True)
+    designation = models.CharField(max_length=100,blank=True, null=True)
+
+    prepared_by = models.CharField(max_length=100, blank=True, null=True)
+    prepared_by_sign = models.CharField(max_length=100, blank=True, null=True)
+    prepared_date = models.DateField(blank=True,null=True)
+
+    remarks = models.TextField(blank=True, null=True)
+
+    location = models.CharField(max_length=255, blank=True, null=True)
+
+    # Uploads
+    certificate_of_incorporation = models.FileField(upload_to='documents/certificates/', blank=True, null=True)
+    passport_photo = models.ImageField(upload_to='photos/passports/', blank=True, null=True)
+    business_billboard = models.ImageField(upload_to='photos/billboards/', blank=True, null=True)
+
+    date_filled = models.DateTimeField(auto_now_add=True,null=True)
 
     def __str__(self):
-        return f"{self.name} - {self.contact}"
+        return self.name_of_business
 
 
 class SparePart(models.Model):

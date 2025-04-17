@@ -14,5 +14,7 @@ urlpatterns = [
      path('list/', views.list_estimates, name='list_estimates'),
      path('download-template/', views.download_estimate_template, name='download_estimate_template'),
      path('dispatch/<int:dispatch_id>/verify/', views.verify_dispatch, name='verify-dispatch'),
+
+     path('register/', views.register_customer, name='register_customer'),
     
 ]
