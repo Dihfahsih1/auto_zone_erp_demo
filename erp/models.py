@@ -25,6 +25,18 @@ class Department(models.Model):
         return self.name
 
 
+class UserRole(models.Model):
+    name = models.CharField(max_length=50, unique=True, verbose_name=_("Role Name"))
+    description = models.TextField(blank=True, verbose_name=_("Role Description"))
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = _("Role")
+        verbose_name_plural = _("Roles")
+
+    def __str__(self):
+        return self.name
+
 class Employee(AbstractUser):
     department = models.ForeignKey(
         Department,
@@ -32,6 +44,14 @@ class Employee(AbstractUser):
         verbose_name=_("Department"),
         related_name='employees'
     )
+
+    role = models.ForeignKey(
+        UserRole,
+        on_delete=models.PROTECT,
+        verbose_name=_("Role"),
+        related_name='employee_role', null=True
+    )
+
     phone = models.CharField(
         max_length=20,
         verbose_name=_("Phone Number"),
@@ -44,7 +64,7 @@ class Employee(AbstractUser):
         verbose_name=_('groups'),
         blank=True,
         help_text=_('The groups this user belongs to.'),
-        related_name='employee_set',  # Changed from default
+        related_name='employee_set',  
         related_query_name='employee'
     )
     user_permissions = models.ManyToManyField(
@@ -52,7 +72,7 @@ class Employee(AbstractUser):
         verbose_name=_('user permissions'),
         blank=True,
         help_text=_('Specific permissions for this user.'),
-        related_name='employee_set',  # Changed from default
+        related_name='employee_set',   
         related_query_name='employee'
     )
 
