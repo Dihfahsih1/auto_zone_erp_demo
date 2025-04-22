@@ -89,7 +89,7 @@ class Customer(models.Model):
     # Uploads
     certificate_of_incorporation = models.FileField(upload_to='documents/certificates/', blank=True, null=True)
     passport_photo = models.ImageField(upload_to='photos/passports/', blank=True, null=True)
-    business_billboard = models.ImageField(upload_to='photos/billboards/', blank=True, null=True)
+    trading_license = models.ImageField(upload_to='photos/license/', blank=True, null=True)
 
     date_filled = models.DateTimeField(auto_now_add=True,null=True)
 
