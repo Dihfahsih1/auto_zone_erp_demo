@@ -15,6 +15,11 @@ urlpatterns = [
      path('download-template/', views.download_estimate_template, name='download_estimate_template'),
      path('dispatch/<int:dispatch_id>/verify/', views.verify_dispatch, name='verify-dispatch'),
 
+     #customer module
      path('register/', views.register_customer, name='register_customer'),
+     path('customers/', views.customer_list, name='customer_list'),
+     path('customers/<int:pk>/view/', views.customer_view, name='customer_view'),
+     path('customers/<int:pk>/edit/', views.customer_edit, name='customer_edit'),
+     path('customers/<int:pk>/delete/', views.customer_delete, name='customer_delete'),
     
 ]

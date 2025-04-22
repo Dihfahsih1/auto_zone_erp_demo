@@ -1,0 +1,375 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Add this to your CSS -->
+<style>
+    .document-upload-container {
+        border: 1px dashed #ccc;
+        padding: 15px;
+        border-radius: 5px;
+        background-color: #fafafa;
+    }
+    
+    .document-thumbnail {
+        max-height: 120px;
+        max-width: 100%;
+        display: block;
+        margin: 0 auto;
+    }
+    
+    .pdf-thumbnail {
+        text-align: center;
+        padding: 10px;
+        border: 1px solid #eee;
+        background: #f9f9f9;
+    }
+    
+    .file-name-display {
+        color: #28a745;
+        font-weight: 500;
+    }
+    
+    .document-actions {
+        display: flex;
+        gap: 5px;
+        justify-content: center;
+    }
+</style>
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="container">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">Edit Customer Details</h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-success">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+        
+                    <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+        
+                        <!-- SECTION 1: Business Info -->
+                        <h5 class="mb-3">Business Information</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.name_of_business.label_tag }}
+                                {{ form.name_of_business }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.physical_address.label_tag }}
+                                {{ form.physical_address }}
+                            </div>
+                        </div>
+        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                {{ form.district.label_tag }}
+                                {{ form.district }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.road.label_tag }}
+                                {{ form.road }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.nearest_landmark.label_tag }}
+                                {{ form.nearest_landmark }}
+                            </div>
+                        </div>
+        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.tel_no.label_tag }}
+                                {{ form.tel_no }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.location.label_tag }}
+                                {{ form.location }}
+                            </div>
+                        </div>
+        
+                        <!-- SECTION 2: Ownership & Kin -->
+                        <h5 class="mt-4 mb-3">Ownership & Kin Details</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.owner_name.label_tag }}
+                                {{ form.owner_name }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.owner_tel.label_tag }}
+                                {{ form.owner_tel }}
+                            </div>
+                        </div>
+        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.next_of_kin.label_tag }}
+                                {{ form.next_of_kin }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.next_of_kin_tel.label_tag }}
+                                {{ form.next_of_kin_tel }}
+                            </div>
+                        </div>
+        
+                        
+                       <!-- SECTION 3: Attached Documents -->
+                        <h5 class="mt-4 mb-3">Attached Documents</h5>
+
+                    <!-- Passport Photo -->
+                    <div class="row mb-3">
+                      <div class="col-md-6">
+        <label class="form-label">Passport Photo</label>
+        <div class="document-upload-container">
+            {% if form.instance.passport_photo %}
+                <div class="current-document mb-3">
+                    <small class="text-muted">Current Document:</small>
+                    <div class="document-preview">
+                        <img src="{{ form.instance.passport_photo.url }}" class="img-thumbnail document-thumbnail">
+                        <div class="document-actions mt-2">
+                            <a href="{{ form.instance.passport_photo.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete('passport_photo')">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <div class="upload-control">
+                <label class="btn btn-sm btn-success mb-0">
+                    <i class="fas fa-upload"></i> {% if form.instance.passport_photo %}Replace{% else %}Upload{% endif %} Passport Photo
+                    {{ form.passport_photo }}
+                </label>
+                <small class="form-text text-muted">JPG or PNG, max 2MB</small>
+                <div id="passport_photo_filename" class="file-name-display mt-1"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Billboard Photo -->
+    <div class="col-md-6">
+        <label class="form-label">Business Billboard</label>
+        <div class="document-upload-container">
+            {% if form.instance.billboard_photo %}
+                <div class="current-document mb-3">
+                    <small class="text-muted">Current Document:</small>
+                    <div class="document-preview">
+                        <img src="{{ form.instance.billboard_photo.url }}" class="img-thumbnail document-thumbnail">
+                        <div class="document-actions mt-2">
+                            <a href="{{ form.instance.billboard_photo.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete('billboard_photo')">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <div class="upload-control">
+                <label class="btn btn-sm btn-success mb-0">
+                    <i class="fas fa-upload"></i> {% if form.instance.billboard_photo %}Replace{% else %}Upload{% endif %} Billboard
+                    {{ form.billboard_photo }}
+                </label>
+                <small class="form-text text-muted">JPG or PNG, max 2MB</small>
+                <div id="billboard_photo_filename" class="file-name-display mt-1"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Certificate and ID Document (similar structure) -->
+<div class="row mb-3">
+    <div class="col-md-6">
+        <label class="form-label">Certificate of Incorporation</label>
+        <div class="document-upload-container">
+            {% if form.instance.certificate_of_incorporation %}
+                <div class="current-document mb-3">
+                    <small class="text-muted">Current Document:</small>
+                    <div class="document-preview">
+                        {% with form.instance.certificate_of_incorporation.url|lower as doc_url %}
+                            {% if ".pdf" in doc_url %}
+                                <div class="pdf-thumbnail">
+                                    <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                                    <small>PDF Document</small>
+                                </div>
+                            {% else %}
+                                <img src="{{ form.instance.certificate_of_incorporation.url }}" class="img-thumbnail document-thumbnail">
+                            {% endif %}
+                        {% endwith %}
+                        <div class="document-actions mt-2">
+                            <a href="{{ form.instance.certificate_of_incorporation.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete('certificate_of_incorporation')">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <div class="upload-control">
+                <label class="btn btn-sm btn-success mb-0">
+                    <i class="fas fa-upload"></i> {% if form.instance.certificate_of_incorporation %}Replace{% else %}Upload{% endif %} Certificate
+                    {{ form.certificate_of_incorporation }}
+                </label>
+                <small class="form-text text-muted">PDF, JPG or PNG, max 5MB</small>
+                <div id="certificate_filename" class="file-name-display mt-1"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <label class="form-label">National ID / Other ID Document</label>
+        <div class="document-upload-container">
+            {% if form.instance.id_document %}
+                <div class="current-document mb-3">
+                    <small class="text-muted">Current Document:</small>
+                    <div class="document-preview">
+                        {% with form.instance.id_document.url|lower as doc_url %}
+                            {% if ".pdf" in doc_url %}
+                                <div class="pdf-thumbnail">
+                                    <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                                    <small>PDF Document</small>
+                                </div>
+                            {% else %}
+                                <img src="{{ form.instance.id_document.url }}" class="img-thumbnail document-thumbnail">
+                            {% endif %}
+                        {% endwith %}
+                        <div class="document-actions mt-2">
+                            <a href="{{ form.instance.id_document.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete('id_document')">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <div class="upload-control">
+                <label class="btn btn-sm btn-success mb-0">
+                    <i class="fas fa-upload"></i> {% if form.instance.id_document %}Replace{% else %}Upload{% endif %} ID Document
+                    {{ form.id_document }}
+                </label>
+                <small class="form-text text-muted">PDF, JPG or PNG, max 5MB</small>
+                <div id="id_document_filename" class="file-name-display mt-1"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add this to your CSS -->
+<style>
+    .document-upload-container {
+        border: 1px dashed #ccc;
+        padding: 15px;
+        border-radius: 5px;
+        background-color: #fafafa;
+    }
+    
+    .document-thumbnail {
+        max-height: 120px;
+        max-width: 100%;
+        display: block;
+        margin: 0 auto;
+    }
+    
+    .pdf-thumbnail {
+        text-align: center;
+        padding: 10px;
+        border: 1px solid #eee;
+        background: #f9f9f9;
+    }
+    
+    .file-name-display {
+        color: #28a745;
+        font-weight: 500;
+    }
+    
+    .document-actions {
+        display: flex;
+        gap: 5px;
+        justify-content: center;
+    }
+</style>
+
+<!-- Add this JavaScript -->
+<script>
+    // Show selected filename
+    document.addEventListener('DOMContentLoaded', function() {
+        // For each file input
+        ['passport_photo', 'billboard_photo', 'certificate_of_incorporation', 'id_document'].forEach(field => {
+            const input = document.querySelector(`#id_${field}`);
+            if (input) {
+                input.addEventListener('change', function() {
+                    const fileName = this.files[0] ? this.files[0].name : '';
+                    document.getElementById(`${field}_filename`).textContent = fileName;
+                });
+            }
+        });
+    });
+    
+    // Confirm document removal
+    function confirmDelete(fieldName) {
+        if (confirm('Are you sure you want to remove this document?')) {
+            // Create a hidden input to indicate deletion
+            const deleteInput = document.createElement('input');
+            deleteInput.type = 'hidden';
+            deleteInput.name = `delete_${fieldName}`;
+            deleteInput.value = 'true';
+            document.querySelector('form').appendChild(deleteInput);
+            
+            // Hide the current document preview
+            document.querySelector(`#id_${fieldName}`).closest('.document-upload-container')
+                .querySelector('.current-document').style.display = 'none';
+            
+            // Clear the file input
+            document.querySelector(`#id_${fieldName}`).value = '';
+        }
+    }
+</script>
+        
+                        <!-- SECTION 4: Prepared & Signed -->
+                        <h5 class="mt-4 mb-3">Signatures</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                {{ form.signed_by.label_tag }}
+                                {{ form.signed_by }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.prepared_by.label_tag }}
+                                {{ form.prepared_by }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.prepared_date.label_tag }}
+                                {{ form.prepared_date }}
+                            </div>
+                        </div>
+        
+                        <div class="mb-3">
+                            {{ form.remarks.label_tag }}
+                            {{ form.remarks }}
+                        </div>
+        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Update Customer</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <!-- Header and Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-md-12 d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Registered Customers</h2>
+            <div>
+                <a href="{% url 'register_customer' %}" class="btn btn-success me-2">Register New Customer</a>
+                <a href="" class="btn btn-outline-secondary me-2">Export PDF</a>
+                <a href="" class="btn btn-outline-success">Export Excel</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Table -->
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Name of Business</th>
+                        <th>Physical Address</th>
+                        <th>Tel No.</th>
+                        <th>Owner</th>
+                        <th>Next of Kin</th>
+                        <th>Location</th>
+                        <th>Date Registered</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in page_obj.object_list %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ customer.name_of_business }}</td>
+                        <td>{{ customer.physical_address }}</td>
+                        <td>{{ customer.tel_number }}</td>
+                        <td>{{ customer.owner_name }}</td>
+                        <td>{{ customer.next_of_kin }}</td>
+                        <td>{{ customer.location }}</td>
+                        <td>{{ customer.date_filled|date:"Y-m-d" }}</td>
+                        <td>
+                            <a href="{% url 'customer_view' customer.pk %}" class="btn btn-info btn-sm mb-1"  title="view">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'customer_edit' customer.pk %}" class="btn btn-warning btn-sm mb-1" title="edit">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a href="{% url 'customer_delete' customer.pk %}" 
+                               class="btn btn-danger btn-sm mb-1" title="delete"
+                               onclick="return confirm('Are you sure you want to delete this customer?')">
+                               <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center">No customers registered yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="row">
+        <div class="col-md-12">
+            <nav>
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                    {% endif %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_obj.number }}</span>
+                    </li>
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

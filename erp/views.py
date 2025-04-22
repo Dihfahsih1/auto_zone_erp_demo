@@ -6,7 +6,7 @@ from django.utils.translation import gettext as _
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from erp.forms import DispatchForm,DeliveryNoteForm, EstimateForm
-from .models import DeliveryNote, Dispatch, Estimate
+from .models import Customer, DeliveryNote, Dispatch, Estimate
 import json
 from django.db.models import Q
 from django.core.paginator import Paginator
@@ -18,6 +18,16 @@ from .models import Estimate
 from .forms import DispatchVerificationForm, EstimateForm, EstimateUploadForm
 from django.shortcuts import render, get_object_or_404, redirect
 from .forms import CustomerForm
+
+
+from django.core.paginator import Paginator
+
+def customer_list(request):
+    customers = Customer.objects.all().order_by('-date_filled')
+    paginator = Paginator(customers, 10)  # Show 10 customers per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'customer_list.html', {'page_obj': page_obj})
 
 def register_customer(request):
     submitted = False
@@ -31,6 +41,27 @@ def register_customer(request):
         form = CustomerForm()
 
     return render(request, 'register_customer.html', {'form': form, 'submitted': submitted})
+
+def customer_view(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+    return render(request, 'customer_view.html', {'customer': customer})
+
+def customer_edit(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+    if request.method == 'POST':
+        form = CustomerForm(request.POST, request.FILES, instance=customer)
+        if form.is_valid():
+            form.save()
+            return redirect('customer_list')
+    else:
+        form = CustomerForm(instance=customer)
+    return render(request, 'customer_edit.html', {'form': form, 'edit_mode': True})
+
+def customer_delete(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+    customer.delete()
+    return redirect('customer_list')
+
 
 @require_http_methods(["PATCH"])
 def mark_delivered(request, dispatch_id):
