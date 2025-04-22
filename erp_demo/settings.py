@@ -8,6 +8,7 @@ ALLOWED_HOSTS = []
 
 
 INSTALLED_APPS = [ 
+    'erp.apps.ErpConfig', 
     'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -15,18 +16,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'erp',
+    
     'auditlog', 
     "crispy_forms",
     "crispy_bootstrap4",  # Change to "crispy_bootstrap4" if using Bootstr
     
 ]
+
+# AUTH_USER_MODEL = 'erp.Employee' 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
 CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 # Optional settings
-IMPORT_EXPORT_USE_TRANSACTIONS = True  # Enable DB transactions
-IMPORT_EXPORT_SKIP_ADMIN_LOG = True    # Reduce log clutter
+IMPORT_EXPORT_USE_TRANSACTIONS = True   
+IMPORT_EXPORT_SKIP_ADMIN_LOG = True     
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
