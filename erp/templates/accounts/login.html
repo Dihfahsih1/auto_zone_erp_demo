@@ -1,0 +1,71 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Login - Employee Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xl-5 col-lg-6 col-md-8">
+        <div class="card auth-card o-hidden my-5">
+            <div class="auth-header py-4 text-center">
+                <h2 class="text-white font-weight-bold">Welcome Back!</h2>
+            </div>
+            <div class="card-body p-5">
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Error!</strong> Invalid username or password.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-4">
+                        <label for="id_username" class="form-label">Username *</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="id_username" name="username" 
+                                   value="{{ form.username.value|default:'' }}" required>
+                        </div>
+                        <div class="invalid-feedback">
+                            Please provide your username.
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_password" class="form-label">Password*</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="id_password" name="password" required>
+                        </div>
+                        <div class="invalid-feedback">
+                            Please provide your password.
+                        </div>
+                    </div>
+
+                    <div class="mb-4 form-check">
+                        <input type="checkbox" class="form-check-input" id="rememberMe">
+                        <label class="form-check-label" for="rememberMe">Remember Me</label>
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button class="btn btn-primary btn-lg" type="submit">Login</button>
+                    </div>
+
+                    <div class="text-center">
+                        <a class="small" href="#">Forgot Password?</a>
+                    </div>
+
+                    <div class="divider">
+                        <span class="divider-text">OR</span>
+                    </div>
+
+                    <div class="text-center">
+                        <a class="small" href="{% url 'register' %}">Create an Account!</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

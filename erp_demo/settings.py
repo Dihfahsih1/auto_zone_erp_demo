@@ -23,7 +23,7 @@ INSTALLED_APPS = [
     
 ]
 
-# AUTH_USER_MODEL = 'erp.Employee' 
+AUTH_USER_MODEL = 'erp.Employee' 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
 CRISPY_TEMPLATE_PACK = "bootstrap4"
 

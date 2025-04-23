@@ -17,10 +17,43 @@ from datetime import datetime
 from .models import Estimate
 from .forms import DispatchVerificationForm, EstimateForm, EstimateUploadForm
 from django.shortcuts import render, get_object_or_404, redirect
-from .forms import CustomerForm
-
-
+from .forms import CustomerForm, EmployeeLoginForm,EmployeeRegistrationForm
+from django.contrib.auth import login, authenticate
 from django.core.paginator import Paginator
+
+
+def register_employee(request):
+    if request.method == 'POST':
+        form = EmployeeRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Registration successful!')
+            return redirect('dashboard')  # Replace with your desired redirect
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = EmployeeRegistrationForm()
+    
+    return render(request, 'accounts/register.html', {'form': form})
+
+def login_employee(request):
+    if request.method == 'POST':
+        form = EmployeeLoginForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, f'Welcome back, {username}!')
+                return redirect('dashboard')  # Replace with your desired redirect
+        else:
+            messages.error(request, 'Invalid username or password.')
+    else:
+        form = EmployeeLoginForm()
+    
+    return render(request, 'accounts/login.html', {'form': form})
 
 def customer_list(request):
     customers = Customer.objects.all().order_by('-date_filled')

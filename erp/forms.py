@@ -3,7 +3,25 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 from .models import Dispatch,DeliveryNote, Estimate
 
-from .models import Customer
+from .models import Customer,Employee,Department,UserRole
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+ 
+
+class EmployeeRegistrationForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+    phone = forms.CharField(max_length=20, required=False)
+    department = forms.ModelChoiceField(queryset=Department.objects.all())
+    role = forms.ModelChoiceField(queryset=UserRole.objects.all(), required=False)
+
+    class Meta:
+        model = Employee
+        fields = ('username', 'email', 'password1', 'password2', 
+                 'first_name', 'last_name', 'phone', 'department', 'role')
+
+class EmployeeLoginForm(AuthenticationForm):
+    class Meta:
+        model = Employee
+        fields = ('username', 'password')
 
 class CustomerForm(forms.ModelForm):
     class Meta:

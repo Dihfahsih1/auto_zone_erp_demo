@@ -21,5 +21,10 @@ urlpatterns = [
      path('customers/<int:pk>/view/', views.customer_view, name='customer_view'),
      path('customers/<int:pk>/edit/', views.customer_edit, name='customer_edit'),
      path('customers/<int:pk>/delete/', views.customer_delete, name='customer_delete'),
+
+
+     #Account registration and login
+     path('accounts/register/', views.register_employee, name='register'),
+     path('accounts/login/', views.login_employee, name='login'),
     
 ]

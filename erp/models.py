@@ -57,6 +57,17 @@ class Employee(AbstractUser):
         verbose_name=_("Phone Number"),
         blank=True
     )
+
+
+    #is_verified = models.BooleanField(default=False, verbose_name='Verified by Admin'),
+
+    is_verified = models.BooleanField(
+        default=False,
+        verbose_name='Verified by Admin',
+        blank=True, null=True
+    )
+    
+    #is_accepted = models.BooleanField(default=False, verbose_name='Verified by Admin'),
     
     # Add these to resolve the clash
     groups = models.ManyToManyField(
