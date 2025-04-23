@@ -1,7 +1,7 @@
 import json
 from django import forms
 from django.contrib import admin
-from .models import Department, Employee, Customer, SparePart, Estimate, EstimateItem, Verification, Dispatch, DeliveryNote, StoresReconciliation
+from .models import Department, Employee, Customer, SparePart, Estimate, EstimateItem, Verification, Dispatch, DeliveryNote, StoresReconciliation, UserRole
 
 from django.utils.html import format_html
 from django.contrib import admin
@@ -11,6 +11,11 @@ from django.templatetags.static import static
 from .utils.delivery_ocr import extract_delivery_data
 
 # Model Admin Classes
+@admin.register(UserRole)
+class UserRoleAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description')
+    search_fields = ('name',)
+    
 @admin.register(Department)
 class DepartmentAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')
