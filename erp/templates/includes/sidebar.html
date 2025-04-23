@@ -168,6 +168,14 @@
             <p>Reports</p>
           </a>
         </li>
+
+        {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'logout' %}">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+          </li>
+        {% endif %}
       </ul>
       <!--end::Sidebar Menu-->
     </nav>

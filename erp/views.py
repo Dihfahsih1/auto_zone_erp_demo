@@ -20,6 +20,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .forms import CustomerForm, EmployeeLoginForm,EmployeeRegistrationForm
 from django.contrib.auth import login, authenticate
 from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
 
 
 def register_employee(request):
@@ -54,7 +55,7 @@ def login_employee(request):
         form = EmployeeLoginForm()
     
     return render(request, 'accounts/login.html', {'form': form})
-
+@login_required
 def customer_list(request):
     customers = Customer.objects.all().order_by('-date_filled')
     paginator = Paginator(customers, 10)  # Show 10 customers per page
@@ -62,6 +63,7 @@ def customer_list(request):
     page_obj = paginator.get_page(page_number)
     return render(request, 'customer_list.html', {'page_obj': page_obj})
 
+@login_required
 def register_customer(request):
     submitted = False
     if request.method == 'POST':
@@ -75,10 +77,12 @@ def register_customer(request):
 
     return render(request, 'register_customer.html', {'form': form, 'submitted': submitted})
 
+@login_required
 def customer_view(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
     return render(request, 'customer_view.html', {'customer': customer})
 
+@login_required
 def customer_edit(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
     if request.method == 'POST':
@@ -90,12 +94,13 @@ def customer_edit(request, pk):
         form = CustomerForm(instance=customer)
     return render(request, 'customer_edit.html', {'form': form, 'edit_mode': True})
 
+@login_required
 def customer_delete(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
     customer.delete()
     return redirect('customer_list')
 
-
+@login_required
 @require_http_methods(["PATCH"])
 def mark_delivered(request, dispatch_id):
     try:
@@ -116,7 +121,7 @@ def mark_delivered(request, dispatch_id):
             'message': str(e)
         }, status=400)
     
-
+@login_required
 def dashboard(request):
     context = {
         'page_title': 'Dashboard',
@@ -124,7 +129,7 @@ def dashboard(request):
     }
     return render(request, 'index.html', context)
 
-
+@login_required
 def dispatch_view(request):
     """
     Simplified dispatch view that handles:
@@ -178,7 +183,7 @@ def dispatch_view(request):
     
     return HttpResponseBadRequest(_("Invalid request"))
 
-
+@login_required
 def dispatch_list_view(request):
     """
     Display all submitted dispatches in a table format
@@ -201,6 +206,7 @@ def dispatch_list_view(request):
     }
     return render(request, 'dispatch_list.html', context)
 
+@login_required
 def upload_delivery_note(request):
     if request.method == 'POST':
         form = DeliveryNoteForm(request.POST, request.FILES)
@@ -218,6 +224,7 @@ def upload_delivery_note(request):
     
     return render(request, 'upload_note.html', {'form': form})
 
+@login_required
 def delivery_note_list(request):
     # Get search query if exists
     search_query = request.GET.get('search', '')
@@ -250,7 +257,7 @@ def delivery_note_list(request):
     }
     return render(request, 'delivery_note_list.html', context)
 
-
+@login_required
 def record_estimate(request):
     if request.method == 'POST':
         # Check which form was submitted
@@ -271,7 +278,7 @@ def record_estimate(request):
         'form': form,
         'upload_form': upload_form
     })
-
+@login_required
 def handle_form_submission(request):
     form = EstimateForm(request.POST)
     if form.is_valid():
@@ -285,6 +292,7 @@ def handle_form_submission(request):
             'upload_form': upload_form
         })
 
+@login_required
 def handle_excel_upload(request):
     upload_form = EstimateUploadForm(request.POST, request.FILES)
     if not upload_form.is_valid():
@@ -328,6 +336,7 @@ def handle_excel_upload(request):
             'upload_form': upload_form
         })
 
+@login_required
 def generate_estimate_id():
     """Generate a new estimate ID in EST-YYYY-NNNN format"""
     from django.utils import timezone
@@ -338,6 +347,8 @@ def generate_estimate_id():
         return f"EST-{year}-{last_num + 1:04d}"
     return f"EST-{year}-0001"
 
+
+@login_required
 def list_estimates(request):
     # Get filter parameters
     status_filter = request.GET.get('status')
@@ -373,6 +384,8 @@ from django.http import HttpResponse
 import pandas as pd
 from io import BytesIO
 
+
+@login_required
 def download_estimate_template(request):
     # Create a sample DataFrame
     data = {
@@ -399,6 +412,8 @@ def download_estimate_template(request):
     return response
 
 from django.utils import timezone
+
+@login_required
 def verify_dispatch(request, dispatch_id):
     dispatch = get_object_or_404(Dispatch, pk=dispatch_id)
     
