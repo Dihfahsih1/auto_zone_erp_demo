@@ -91,6 +91,27 @@ class Employee(AbstractUser):
         verbose_name = _("Employee")
         verbose_name_plural = _("Employees")
 
+
+
+
+class Region(models.Model):
+    name = models.CharField(max_length=200, blank=True, null=True)
+    districts = models.CharField(max_length=200, blank=True, null=True)
+    description = models.TextField(null=True,blank=True)
+
+    def __str__(self):
+        return self.name
+    
+class SalesPerson(models.Model):
+    name = models.ForeignKey(Employee, 
+                             on_delete=models.CASCADE,
+                             verbose_name=_("SalesPerson"),
+                             related_name='salespersons')
+    description = models.TextField(null=True,blank=True)
+
+    def __str__(self):
+        return self.first_name
+    
 class Customer(models.Model):
     name_of_business = models.CharField(max_length=200, blank=True, null=True)
     district = models.CharField(max_length=100, blank=True, null=True)
@@ -403,51 +424,63 @@ class Dispatch(models.Model):
 
 from django.core.validators import FileExtensionValidator
 
+ 
 class DeliveryNote(models.Model):
-    estimate_number = models.CharField(
-        max_length=20,
-        verbose_name="Estimate Number",
-        help_text="The estimate number this delivery note belongs to"
-    )
+    DELIVERY_STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('RECEIVED', 'Received'),
+    ]
     customer_name = models.CharField(
         max_length=100,
-        verbose_name="Customer Name"
+        verbose_name="Customer Name",blank=True, null=True
     )
-    destination = models.CharField(
-        max_length=200,
-        verbose_name="Delivery Destination"
-    )
-    customer_remarks = models.TextField(
-        verbose_name="Customer Remarks",
-        blank=True,
-        null=True
-    )
-    sales_agent = models.CharField(
+    customer_location = models.CharField(
         max_length=100,
-        verbose_name="Sales Agent Name"
+        verbose_name="Customer Location",blank=True, null=True
     )
-    signed_document = models.FileField(
-        upload_to='delivery_notes/%Y/%m/%d/',
-        validators=[FileExtensionValidator(['pdf', 'jpg', 'jpeg', 'png'])],
-        verbose_name="Signed Delivery Note"
+    customer_contact = models.CharField(
+        max_length=100,
+        verbose_name="Customer Contact",blank=True, null=True
     )
-    upload_date = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Upload Date"
+    receiver_name = models.CharField(
+        max_length=100,
+        verbose_name="receiver name",blank=True, null=True
     )
-    is_verified = models.BooleanField(
-        default=False,
-        verbose_name="Verified by Admin"
+    receiver_contact = models.CharField(
+        max_length=100,
+        verbose_name="receiver contact",blank=True, null=True
+    )
+    dates_of_goods_received=models.CharField(
+        max_length=100,
+        verbose_name="Goods received Goods",blank=True, null=True
     )
 
-    class Meta:
-        verbose_name = "Customer Delivery Note"
-        verbose_name_plural = "Customer Delivery Notes"
-        ordering = ['-upload_date']
+    warehouse=models.CharField(
+        max_length=100,
+        verbose_name="Warehouse",blank=True, null=True
+    )
+    estimate_no = models.CharField(max_length=100, blank=True, null=True)
+    salesperson = models.CharField(max_length=100, blank=True, null=True)
+    made_on = models.CharField(max_length=100, blank=True, null=True)
+    s_no = models.CharField(max_length=100, blank=True, null=True)
+    remarks = models.TextField(blank=True, null=True)
+    quantity = models.CharField(max_length=100, blank=True, null=True)
+    authorized_signatory = models.CharField(max_length=100, blank=True, null=True)
+
+    uploaded_form = models.FileField(upload_to='scanned_notes/',blank=True, null=True)
+     
+    particulars = models.TextField(blank=True, null=True) 
+    
+    transaction_value = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    
+    delivery_person = models.CharField(max_length=100, blank=True, null=True)
+    status = models.CharField(max_length=10, choices=DELIVERY_STATUS_CHOICES, default='PENDING')
+    received_date = models.DateField(blank=True, null=True) 
+    days_outstanding = models.IntegerField(blank=True, null=True)
+    ageing = models.CharField(max_length=20, blank=True, null=True)
 
     def __str__(self):
-        return f"Delivery Note for {self.estimate_number} - {self.customer_name}"
-
+        return f"Note {self.vchno} ({self.status})"
 # ----------------------------
 # 5. Reconciliation          #
 # ----------------------------

@@ -211,7 +211,7 @@ JAZZMIN_SETTINGS = {
     },
   
 }
-
+DJANGO_ADMIN_LOGGING = False
 JAZZMIN_UI_TWEAKS = {
     "navbar_small_text": False,
     "footer_small_text": False,

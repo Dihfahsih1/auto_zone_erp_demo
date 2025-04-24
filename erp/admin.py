@@ -1,7 +1,7 @@
 import json
 from django import forms
 from django.contrib import admin
-from .models import Department, Employee, Customer, SparePart, Estimate, EstimateItem, Verification, Dispatch, DeliveryNote, StoresReconciliation, UserRole
+from .models import Department,Region,SalesPerson, Employee, Customer, SparePart, Estimate, EstimateItem, Verification, Dispatch, DeliveryNote, StoresReconciliation, UserRole
 
 from django.utils.html import format_html
 from django.contrib import admin
@@ -11,6 +11,16 @@ from django.templatetags.static import static
 from .utils.delivery_ocr import extract_delivery_data
 
 # Model Admin Classes
+@admin.register(Region)
+class RegionAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description','districts')
+    search_fields = ('name',)
+
+@admin.register(SalesPerson)
+class SalesPersonAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
+
 @admin.register(UserRole)
 class UserRoleAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')
@@ -90,16 +100,11 @@ class DispatchAdmin(admin.ModelAdmin):
 
 @admin.register(DeliveryNote)
 class DeliveryNoteAdmin(admin.ModelAdmin):
-    list_display = ('estimate_number', 'customer_name', 'destination', 'sales_agent', 'upload_date', 'is_verified')
-    list_filter = ('is_verified', 'upload_date')
-    search_fields = ('estimate_number', 'customer_name', 'sales_agent')
-    readonly_fields = ('upload_date',)
-    actions = ['mark_as_verified']
+    list_display = ('estimate_no', 'customer_name', 'customer_contact', 'salesperson')
+    
+    search_fields = ('estimate_no', 'customer_name', 'salesperson') 
 
-    def mark_as_verified(self, request, queryset):
-        queryset.update(is_verified=True)
-    mark_as_verified.short_description = "Mark selected as verified"
-
+   
 @admin.register(StoresReconciliation)
 class StoresReconciliationAdmin(admin.ModelAdmin):
     list_display = ('estimate', 'reconciled_by', 'reconciliation_date')

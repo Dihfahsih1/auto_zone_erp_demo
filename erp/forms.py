@@ -63,20 +63,8 @@ class DispatchForm(forms.ModelForm):
 class DeliveryNoteForm(forms.ModelForm):
     class Meta:
         model = DeliveryNote
-        fields = [
-            'estimate_number',
-            'customer_name',
-            'destination',
-            'customer_remarks',
-            'sales_agent',
-            'signed_document'
-        ]
-        widgets = {
-            'customer_remarks': forms.Textarea(attrs={'rows': 3}),
-        }
-        help_texts = {
-            'signed_document': 'Upload scanned copy or photo of signed delivery note (PDF, JPG, PNG)',
-        }
+        fields = '__all__'
+         
 
 class EstimateForm(forms.ModelForm):
     class Meta:
